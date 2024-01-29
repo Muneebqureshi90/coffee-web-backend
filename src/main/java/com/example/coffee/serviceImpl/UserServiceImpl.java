@@ -590,13 +590,15 @@ public class UserServiceImpl implements UserService {
         // For demonstration purposes, return the current timestamp
         return LocalDateTime.now();
     }
-    private User convertToUserEntity(UserDto userDto) {
-        User userEntity = modelMapper.map(userDto, User.class);
-        return userEntity;
-    }
+//    private User convertToUserEntity(UserDto userDto) {
+//        User userEntity = modelMapper.map(userDto, User.class);
+//        userEntity.setId(userDto.getId());  // Set the id property
+//        return userEntity;
+//    }
+//
+//    private UserDto convertToUserDto(User user) {
+//        UserDto userDto = modelMapper.map(user, UserDto.class);
+//        return userDto;
+//    }
 
-    private UserDto convertToUserDto(User user) {
-        UserDto userDto = modelMapper.map(user, UserDto.class);
-        return userDto;
-    }
 }

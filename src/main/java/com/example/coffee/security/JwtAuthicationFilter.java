@@ -1,5 +1,6 @@
 package com.example.coffee.security;
 
+import com.example.coffee.expections.ResourceNotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
@@ -65,9 +66,11 @@ public class JwtAuthicationFilter extends OncePerRequestFilter {
             } catch (MalformedJwtException e) {
                 logger.info("Some changed has done in token !! Invalid Token");
                 e.printStackTrace();
+            } catch (ResourceNotFoundException e) {
+                logger.info("User not found with the provided email");
+                e.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
-
             }
 
 
@@ -78,26 +81,23 @@ public class JwtAuthicationFilter extends OncePerRequestFilter {
 
 
         //
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-
-            //fetch user detail from username
+        // Check if username is not null and not equal to "NONE_PROVIDED"
+        if (username != null && !username.equals("NONE_PROVIDED") && SecurityContextHolder.getContext().getAuthentication() == null) {
+            // Your existing code for fetching user details and authentication
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
             Boolean validateToken = this.jwtHelper.validateToken(token, userDetails);
             if (validateToken) {
-
-                //set the authentication
+                // Set the authentication
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-
-
             } else {
-                logger.info("Validation fails !!");
+                logger.info("Invalid token or failed to validate token");
             }
-
-
+        } else {
+            logger.info("Invalid or empty username from JWT token");
         }
+
 
         filterChain.doFilter(request, response);
 

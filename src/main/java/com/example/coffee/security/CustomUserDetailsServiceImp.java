@@ -19,8 +19,12 @@ public class CustomUserDetailsServiceImp implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        if (username == null || username.isEmpty()) {
+            throw new UsernameNotFoundException("Username (email) is null or empty");
+        }
+
         User user = userRepository.findByEmail(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User","email",username));
+                .orElseThrow(() -> new ResourceNotFoundException("User", "email", username));
 
         // You can use CustomUserDetails or create your own UserDetails implementation
 

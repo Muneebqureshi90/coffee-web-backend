@@ -15,10 +15,12 @@ import com.example.coffee.services.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -26,6 +28,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
+import org.apache.commons.lang3.StringUtils;
 
 @SecurityRequirement(name = "scheme1")
 @CrossOrigin(origins = "*")
@@ -50,25 +53,61 @@ public class AuthController {
     @Autowired
     private RefreshTokenService refreshTokenService;
 
-
+    @Autowired
+    private ModelMapper modelMapper;
     private Logger logger = LoggerFactory.getLogger(AuthController.class);
 
-    @PostMapping("/login")
+//    @PostMapping("/login")
+//    public ResponseEntity<JwtAuthResponse> login(@Valid @RequestBody JwtAuthRequest request) {
+//        this.doAuthenticate(request.getUsername(), request.getPassword());
+//
+//        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
+//        String token = this.helper.generateToken(userDetails);
+//
+//        // This is for Refresh Token
+//        RefreshToken refreshToken = this.refreshTokenService.createRefreshToken(userDetails.getUsername());
+//
+//        // Populate additional user-related information in the response
+//        JwtAuthResponse response = new JwtAuthResponse();
+//        response.setToken(token);
+//        response.setRefreshToken(refreshToken.getRefreshToken());
+////        response.setUser(userDetails.getUsername());
+////        response.setUser(userDetails.getUsername());  // Add other user-related fields as needed
+//        response.setUser(this.modelMapper.map((User)userDetails,UserDto.class));
+//
+//        return new ResponseEntity<>(response, HttpStatus.OK);
+//    }
+
+
+    @PostMapping(path = "/login", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<JwtAuthResponse> login(@Valid @RequestBody JwtAuthRequest request) {
-        this.doAuthenticate(request.getUserName(), request.getPassword());
+        try {
+            System.out.println("Received request: " + request);
+            this.doAuthenticate(request.getUserName(), request.getPassword());
 
-        UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUserName());
-        String token = this.helper.generateToken(userDetails);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUserName());
+            String token = this.helper.generateToken(userDetails);
+            System.out.println(userDetails);
 
-        // This is for Refresh Token
-        RefreshToken refreshToken = this.refreshTokenService.createRefreshToken(userDetails.getUsername());
+            // This is for Refresh Token
+            RefreshToken refreshToken = this.refreshTokenService.createRefreshToken(userDetails.getUsername());
 
-        JwtAuthResponse response = new JwtAuthResponse();
-        response.setToken(token);
-        response.setRefreshToken(refreshToken.getRefreshToken());
+            JwtAuthResponse response = new JwtAuthResponse();
+            response.setToken(token);
+            response.setRefreshToken(refreshToken.getRefreshToken());
+            response.setUser(this.modelMapper.map((User)userDetails, UserDto.class));
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            // Log the exception or handle it as appropriate for your application
+            // For demonstration purposes, printing the stack trace to console
+            e.printStackTrace();
+
+            // You can customize the response based on the type of exception
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
+
 
     // AuthController.java
 
@@ -128,14 +167,25 @@ public class AuthController {
 //        }
 //    }
 
-    private void doAuthenticate(String email, String password) {
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(email, password);
+    private void doAuthenticate(String username, String password) {
+        if (StringUtils.isEmpty(username)) {
+            throw new BadCredentialsException("Username is null or empty");
+        }
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username, password);
+
         try {
             this.authenticationManager.authenticate(authentication);
+            // Log successful authentication
+            logger.info("User {} successfully authenticated.", username);
         } catch (BadCredentialsException e) {
+            // Log authentication failure
+            logger.error("Authentication failed for user {}: {}", username, e.getMessage());
             throw new BadCredentialsException("Invalid Username or Password!!");
         }
     }
+
+
 
     @ExceptionHandler(BadCredentialsException.class)
     public String exceptionHandler() {

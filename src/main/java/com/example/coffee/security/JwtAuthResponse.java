@@ -1,8 +1,7 @@
 package com.example.coffee.security;
 
 
-
-import com.example.coffee.entity.User;
+import com.example.coffee.dto.UserDto;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,13 +11,13 @@ import lombok.NoArgsConstructor;
 public class JwtAuthResponse {
     private String token;
 
-    private User user;
-//    This is for refresh Token
+    private UserDto user;
+    //    This is for refresh Token
     private String refreshToken;
 //    private String userName;
 
 
-//     for Otp on emial
-private boolean otpSent;
+    //     for Otp on emial
+    private boolean otpSent;
     private boolean otpVerificationRequired;
 }

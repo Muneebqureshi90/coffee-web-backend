@@ -10,6 +10,7 @@ import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.web.multipart.MultipartFile;
 
 
 import java.math.BigDecimal;
@@ -27,6 +28,7 @@ public class ProductDto {
 //    @JsonBackReference
 
     private List<ReviewDto> reviews = new ArrayList<>();
+//    private MultipartFile image;
 
     @JsonManagedReference("productRatingReference")
 //    @JsonIgnore
