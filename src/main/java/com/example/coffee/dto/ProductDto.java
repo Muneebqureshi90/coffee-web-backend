@@ -16,7 +16,9 @@ import org.springframework.web.multipart.MultipartFile;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -68,4 +70,7 @@ public class ProductDto {
     @NotNull(message = "Quantity cannot be null")
     @Positive(message = "Quantity must be a positive value")
     private Integer quantity;
+
+    private Set<CartItemDto> cartItems =  new HashSet<>();
+
 }

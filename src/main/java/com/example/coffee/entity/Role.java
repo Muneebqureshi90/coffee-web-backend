@@ -20,4 +20,7 @@ public class Role {
 
     @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
     private Set<User> users;
+
+//    @OneToMany(mappedBy = "role", fetch = FetchType.EAGER)
+//    private Set<Message> messages;
 }

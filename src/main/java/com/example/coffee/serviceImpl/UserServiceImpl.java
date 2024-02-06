@@ -2,10 +2,8 @@ package com.example.coffee.serviceImpl;
 
 import com.example.coffee.config.AppConstants;
 import com.example.coffee.dto.UserDto;
-import com.example.coffee.entity.EmailOtp;
 import com.example.coffee.entity.Role;
 import com.example.coffee.entity.User;
-import com.example.coffee.entity.UserTwilioOtp;
 import com.example.coffee.expections.ResourceNotFoundException;
 import com.example.coffee.expections.UserException;
 import com.example.coffee.expections.UserNotFoundException;

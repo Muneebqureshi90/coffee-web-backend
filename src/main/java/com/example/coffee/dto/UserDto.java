@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Set;
 
 @Data
+@JsonIgnoreProperties({"user", "cartDto"}) // Add this annotation to ignore specific properties causing circular reference
+
 public class UserDto {
 
     private Integer id;
@@ -25,6 +27,14 @@ public class UserDto {
 
     @NotNull(message = "Last name is required")
     private String lastName;
+
+    private String provider; // 'google' or 'facebook', etc.
+
+    private Set<MessageDto> messages = new HashSet<>();
+
+    private Integer cartId; // Add this line for cartId
+//    @JsonManagedReference("userRatingReference")
+//    private CartDto cartDto;
 
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")

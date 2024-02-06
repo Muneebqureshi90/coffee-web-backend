@@ -11,10 +11,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 
 @Entity
@@ -38,6 +35,18 @@ public class User implements UserDetails {
 
     @Column(name = "password")
     private String password;
+
+    private String provider; // 'google' or 'facebook', etc.
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnore
+    private Set<Message> messages = new HashSet<>();
+
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Cart cart;
+
 
     @Column(name = "mobile", unique = true)
     private String phoneNumber; // Change 'mobile' to 'phoneNumber'

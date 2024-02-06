@@ -1,16 +1,16 @@
 package com.example.coffee.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -25,18 +25,13 @@ public class Product {
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private List<Review> reviews = new ArrayList<>();
-    @JsonIgnore
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Rating> ratings = new ArrayList<>();
 
-
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<OrderItem> cartItems = new ArrayList<>();
+    private List<OrderItem> orderItems = new ArrayList<>();
 
-
-    //    @JsonBackReference("userProductReference")
-    @JsonIgnore
     @ManyToOne()
     @JoinColumn(name = "order_id")
     private Order order;
@@ -50,7 +45,6 @@ public class Product {
     private BigDecimal discount_amount;
 
     @ManyToOne(targetEntity = Category.class)
-//    @JsonIgnore
     @JoinColumn(name = "category_id")
     private Category category;
 
@@ -62,5 +56,7 @@ public class Product {
     @Column(name = "quantity")
     private Integer quantity;
 
-
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnore
+    private Set<CartItem> cartItemsList = new HashSet<>();
 }

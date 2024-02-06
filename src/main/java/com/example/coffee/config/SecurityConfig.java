@@ -1,8 +1,5 @@
 package com.example.coffee.config;
 
-
-
-
 import com.example.coffee.security.CustomUserDetailsServiceImp;
 import com.example.coffee.security.JwtAuthicationEntryPoint;
 import com.example.coffee.security.JwtAuthicationFilter;
@@ -18,6 +15,10 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.oauth2.client.registration.ClientRegistration;
+//import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+//import org.springframework.security.oauth2.client.registration.InMemoryClientRegistrationRepository;
+//import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -51,38 +52,29 @@ public class SecurityConfig  {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
         http.csrf(csrf -> csrf.disable())
                 .authorizeRequests()
-
-
-                . requestMatchers("/test")
-                .authenticated()
-//                .requestMatchers("/api/**").permitAll()
+                .requestMatchers("/test").authenticated()
                 .requestMatchers("/auth/**").permitAll()
-                .requestMatchers("/v3/api-docs/**"
-                        ,"/v2/api-docs/**",
-                        "/swagger-ui/**",
-                        "/swagger-ui.html"
-                        ,"/swagger-resources"
-                        ,"/webjars/**").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/v2/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources", "/webjars/**").permitAll()
                 .requestMatchers(HttpMethod.GET).permitAll()
-//                .requestMatchers(HttpMethod.POST).permitAll()
-//                .requestMatchers(HttpMethod.DELETE).permitAll()
-
-                .anyRequest()
-                .authenticated()
-                .and().exceptionHandling(ex -> ex.authenticationEntryPoint(point))
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
-
-
-        http.addFilterBefore(this.filter, UsernamePasswordAuthenticationFilter.class)
-                .cors(cors -> {
-                    cors.configurationSource(corsConfigurationSource());
-                });
+                .anyRequest().authenticated()
+                .and()
+//                .oauth2Login(oauth2Login ->
+//                        oauth2Login
+////                                .loginPage("/login")
+//
+//                                .defaultSuccessUrl("/auth/login",true) // Redirect to a specific React page on success
+////                                .failureUrl("/")
+//                )
+                .exceptionHandling(ex -> ex.authenticationEntryPoint(point))
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         return http.build();
     }
+
 
 
 
@@ -115,6 +107,49 @@ public class SecurityConfig  {
         source.registerCorsConfiguration("/**", config);
         return source;
     }
+
+
+
+//    FOR GOOGGLE AND GITHUB AUTH
+//@Bean
+//public ClientRegistrationRepository clientRegistrationRepository() {
+//    return new InMemoryClientRegistrationRepository(
+//            googleClientRegistration(),
+//            githubClientRegistration()
+//            // Add more client registrations if needed
+//    );
+//}
+//
+//    private ClientRegistration googleClientRegistration() {
+//        return ClientRegistration
+//                .withRegistrationId("google")
+//                .clientId("${spring.security.oauth2.client.registration.google.clientId}")
+//                .clientSecret("${spring.security.oauth2.client.registration.google.clientSecret}")
+//                .redirectUri("http://localhost:8080/login/oauth2/code/google") // Adjust the port and path
+//                .authorizationUri("https://accounts.google.com/o/oauth2/auth")
+//                .tokenUri("https://accounts.google.com/o/oauth2/token")
+//                .userInfoUri("https://www.googleapis.com/oauth2/v3/userinfo")
+//                .userNameAttributeName("id")
+//                .clientName("Google")
+//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+//                .build();
+//    }
+//
+//    private ClientRegistration githubClientRegistration() {
+//        return ClientRegistration
+//                .withRegistrationId("github")
+//                .clientId("${spring.security.oauth2.client.registration.github.clientId}")
+//                .clientSecret("${spring.security.oauth2.client.registration.github.clientSecret}")
+//                .redirectUri("http://localhost:8080/login/oauth2/code/github") // Adjust the port and path
+//                .authorizationUri("https://github.com/login/oauth/authorize")
+//                .tokenUri("https://github.com/login/oauth/access_token")
+//                .userInfoUri("https://api.github.com/user")
+//                .userNameAttributeName("id")
+//                .clientName("GitHub")
+//                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+//                .build();
+//    }
+
 
 
 }

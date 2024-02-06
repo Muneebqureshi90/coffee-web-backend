@@ -1,6 +1,7 @@
 package com.example.coffee.controllers;
 
 
+import com.example.coffee.dto.CartDto;
 import com.example.coffee.dto.UserDto;
 import com.example.coffee.entity.RefreshToken;
 import com.example.coffee.entity.User;
@@ -10,6 +11,7 @@ import com.example.coffee.security.JwtAuthRequest;
 import com.example.coffee.security.JwtAuthResponse;
 import com.example.coffee.security.JwtTokenHelper;
 import com.example.coffee.security.RefreshTokenRequest;
+import com.example.coffee.services.CartService;
 import com.example.coffee.services.RefreshTokenService;
 import com.example.coffee.services.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -29,6 +31,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 import org.apache.commons.lang3.StringUtils;
+
+import java.time.LocalDateTime;
 
 @SecurityRequirement(name = "scheme1")
 @CrossOrigin(origins = "*")
@@ -52,7 +56,8 @@ public class AuthController {
 
     @Autowired
     private RefreshTokenService refreshTokenService;
-
+    @Autowired
+    private CartService cartService;
     @Autowired
     private ModelMapper modelMapper;
     private Logger logger = LoggerFactory.getLogger(AuthController.class);
@@ -196,6 +201,8 @@ public class AuthController {
     public ResponseEntity<String> sendLoginOtp(@RequestParam("email") String email) {
         try {
             userService.sendLoginOtp(email);
+
+
             return new ResponseEntity<>("Login OTP sent successfully", HttpStatus.OK);
         } catch (UserNotFoundException e) {
             return new ResponseEntity<>("User not found", HttpStatus.NOT_FOUND);
@@ -225,11 +232,40 @@ public class AuthController {
 
 //    Register and also controller of otps
 
+//    @PostMapping("/register")
+//    public ResponseEntity<UserDto> registerUser(@Valid @RequestBody UserDto userDto) {
+//        try {
+//            UserDto userRegister = this.userService.registerUser(userDto);
+//            return new ResponseEntity<>(userRegister, HttpStatus.CREATED);
+//        } catch (Exception e) {
+//            // Log the exception or handle it as appropriate for your application
+//            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
+//    }
+
+
     @PostMapping("/register")
     public ResponseEntity<UserDto> registerUser(@Valid @RequestBody UserDto userDto) {
         try {
-            UserDto userRegister = this.userService.registerUser(userDto);
-            return new ResponseEntity<>(userRegister, HttpStatus.CREATED);
+            // Register the user
+            UserDto registeredUser = this.userService.registerUser(userDto);
+
+            // Create a new cart for the user
+            CartDto cartDto = new CartDto();
+            cartDto.setUserId(registeredUser.getId()); // Set the user ID in the cartDto
+
+            CartDto createdCart = this.cartService.createCart(registeredUser);
+
+            // Set the created cart ID to the user
+            registeredUser.setCartId(createdCart.getId());
+
+            // Update the user with the cart ID
+            this.userService.updateUser(registeredUser, registeredUser.getId());
+
+            // Update the userDto with the createdAt
+            registeredUser.setCreatedAt(LocalDateTime.now()); // Use setCreatedAt() instead of setCreateAt()
+
+            return new ResponseEntity<>(registeredUser, HttpStatus.CREATED);
         } catch (Exception e) {
             // Log the exception or handle it as appropriate for your application
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
